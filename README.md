@@ -24,7 +24,8 @@ A Java / Spring Boot service that monitors Android devices connected over `adb`,
 Requirements: Java 17+, and the Android platform tools (`adb`).
 
 ```
-./mvnw spring-boot:run
+./mvnw spring-boot:run        # macOS / Linux / Git Bash
+.\mvnw.cmd spring-boot:run    # Windows PowerShell or cmd
 ```
 
 If `adb` isn't at the default path, pass it in: `./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Dadb.path=/path/to/adb"`.
