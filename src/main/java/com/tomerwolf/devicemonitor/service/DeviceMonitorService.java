@@ -1,5 +1,6 @@
 package com.tomerwolf.devicemonitor.service;
 
+import com.tomerwolf.devicemonitor.adb.AdbException;
 import com.tomerwolf.devicemonitor.adb.AdbService;
 import com.tomerwolf.devicemonitor.model.ConnectionState;
 import com.tomerwolf.devicemonitor.model.DeviceStatus;
@@ -36,7 +37,14 @@ public class DeviceMonitorService {
 
     @Scheduled(fixedDelayString = "${monitor.poll-interval-ms:15000}")
     public void poll() {
-        List<AdbService.RawDevice> raw = adbService.listDevices();
+        List<AdbService.RawDevice> raw;
+        try {
+            raw = adbService.listDevices();
+        } catch (AdbException e) {
+            // Usually means adb isn't installed at adb.path. Log it and keep the last known state.
+            log.warn("Could not list devices: {}", e.getMessage());
+            return;
+        }
 
         for (AdbService.RawDevice rd : raw) {
             ConnectionState newState = switch (rd.state()) {
@@ -53,8 +61,12 @@ public class DeviceMonitorService {
             status.setLastChecked(Instant.now());
 
             if (newState == ConnectionState.ONLINE) {
-                status.setBatteryLevel(adbService.getBatteryLevel(rd.serial()));
-                status.setScreenState(adbService.getScreenState(rd.serial()));
+                try {
+                    status.setBatteryLevel(adbService.getBatteryLevel(rd.serial()));
+                    status.setScreenState(adbService.getScreenState(rd.serial()));
+                } catch (AdbException e) {
+                    log.warn("Could not read details for {}: {}", rd.serial(), e.getMessage());
+                }
             }
 
             if (previous != null && previous != newState) {

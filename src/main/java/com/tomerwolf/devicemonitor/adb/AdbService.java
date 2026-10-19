@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,14 +70,29 @@ public class AdbService {
         return "unknown";
     }
 
-    public byte[] takeScreenshot(String serial) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(adbPath, "-s", serial, "exec-out", "screencap", "-p").start();
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        try (InputStream in = process.getInputStream()) {
-            in.transferTo(buffer);
+    public byte[] takeScreenshot(String serial) {
+        try {
+            Process process = new ProcessBuilder(adbPath, "-s", serial, "exec-out", "screencap", "-p")
+                    .redirectError(ProcessBuilder.Redirect.DISCARD)
+                    .start();
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            try (InputStream in = process.getInputStream()) {
+                in.transferTo(buffer);
+            }
+            if (!process.waitFor(15, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                throw new AdbException("Screenshot timed out for " + serial, null);
+            }
+            if (process.exitValue() != 0 || buffer.size() == 0) {
+                throw new AdbException("Screenshot failed for " + serial, null);
+            }
+            return buffer.toByteArray();
+        } catch (IOException e) {
+            throw new AdbException("Failed to run adb screencap", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AdbException("Interrupted while taking screenshot", e);
         }
-        process.waitFor(15, TimeUnit.SECONDS);
-        return buffer.toByteArray();
     }
 
     /**
@@ -98,12 +114,18 @@ public class AdbService {
             Process process = pb.start();
             List<String> output;
             try (InputStream in = process.getInputStream()) {
-                output = new String(in.readAllBytes()).lines().toList();
+                output = new String(in.readAllBytes(), StandardCharsets.UTF_8).lines().toList();
             }
-            process.waitFor(10, TimeUnit.SECONDS);
+            if (!process.waitFor(10, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                throw new AdbException("adb command timed out: " + String.join(" ", args), null);
+            }
             return output;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             throw new AdbException("Failed to run adb command: " + String.join(" ", args), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AdbException("Interrupted while running adb command", e);
         }
     }
 }

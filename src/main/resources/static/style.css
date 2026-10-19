@@ -120,6 +120,7 @@ header h1 { font-size: 1.9rem; margin: 0 0 6px; letter-spacing: -0.01em; }
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 .btn:disabled { opacity: 0.5; cursor: default; }
+.btn:focus-visible, .btn-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .panel {
   position: fixed;

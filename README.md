@@ -9,6 +9,12 @@ A Java / Spring Boot service that monitors Android devices connected over `adb`,
 - **Thread-safe state:** device state lives in a `ConcurrentHashMap` shared between the background scheduler and the HTTP request threads.
 - **REST API + dashboard:** a static page (`/`) shows the devices; the API serves the same data.
 - **Safe diagnostics:** the diagnostics endpoint runs only an explicit allowlist of read-only commands, never arbitrary shell input.
+- **The server decides which device is targeted:** screenshot and diagnostics requests only work for a serial the monitor discovered itself and that is currently online. Unknown serials get `404`, offline ones `409`.
+- **Local only:** the API has no login and can read a phone's screen, so it listens on `127.0.0.1` only (`server.address` in `application.properties`).
+
+## Tests
+
+`./mvnw test` runs unit tests for the state tracking (online, unauthorized, unplugged, adb failure) and for the controller's allowlist and device checks. They use a mocked `AdbService`, so no phone is needed.
 
 ## API
 

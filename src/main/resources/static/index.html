@@ -13,16 +13,16 @@
       <p class="subtitle">Live Android device discovery, monitoring, and control over ADB.</p>
     </header>
 
-    <section id="devices" class="devices">
+    <section id="devices" class="devices" aria-label="Devices">
       <p class="empty-state">Looking for devices…</p>
     </section>
 
-    <div id="diagnostics-panel" class="panel hidden">
+    <div id="diagnostics-panel" class="panel hidden" role="region" aria-labelledby="panel-title">
       <div class="panel-head">
         <span id="panel-title">Diagnostics</span>
-        <button id="panel-close" class="btn-close" type="button">&times;</button>
+        <button id="panel-close" class="btn-close" type="button" aria-label="Close panel">&times;</button>
       </div>
-      <pre id="panel-content"></pre>
+      <pre id="panel-content" aria-live="polite"></pre>
     </div>
   </main>
 

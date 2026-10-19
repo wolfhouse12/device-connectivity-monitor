@@ -2,14 +2,18 @@ package com.tomerwolf.devicemonitor.model;
 
 import java.time.Instant;
 
+/**
+ * Written by the scheduler thread and read by HTTP request threads. Fields are volatile so a
+ * request always sees the latest value the poller wrote.
+ */
 public class DeviceStatus {
 
     private final String serial;
-    private String model;
-    private ConnectionState connectionState;
-    private Integer batteryLevel;
-    private String screenState;
-    private Instant lastChecked;
+    private volatile String model;
+    private volatile ConnectionState connectionState;
+    private volatile Integer batteryLevel;
+    private volatile String screenState;
+    private volatile Instant lastChecked;
 
     public DeviceStatus(String serial, String model) {
         this.serial = serial;
