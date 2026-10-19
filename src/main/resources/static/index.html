@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Device Connectivity Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Device Connectivity Monitor</h1>
+      <p class="subtitle">Live Android device discovery, monitoring, and control over ADB.</p>
+    </header>
+
+    <section id="devices" class="devices">
+      <p class="empty-state">Looking for devices…</p>
+    </section>
+
+    <div id="diagnostics-panel" class="panel hidden">
+      <div class="panel-head">
+        <span id="panel-title">Diagnostics</span>
+        <button id="panel-close" class="btn-close" type="button">&times;</button>
+      </div>
+      <pre id="panel-content"></pre>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
